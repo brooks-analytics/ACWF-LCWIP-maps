@@ -1,0 +1,30 @@
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+
+.map {
+    width: 80%;
+    margin: auto;
+    height: 80%;
+}
+
+.title {
+    grid-row: 1;
+    justify-self: center;
+    text-align: center;
+    color: grey;
+    box-sizing: border-box;
+    margin-top: 0;
+}
+
+.sub-content {
+    grid-row: 5;
+    padding-left: 10px;
+    text-align: center;
+    color: grey;
+    box-sizing: border-box;
+}
