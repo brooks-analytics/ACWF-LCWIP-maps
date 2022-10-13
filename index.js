@@ -18,13 +18,38 @@ const cyclingRouteColors = {
     C7: "#8c510a",
 }
 
+const walkingRoutes = {
+    W1: "W1",
+    W2: "W2",
+    W3: "W3",
+    W4: "W4",
+}
+
+const walkingRouteColors = {
+    W1: "#1b9e77",
+    W2: "#d95f02",
+    W3: "#7570b3",
+    W4: "#0571b0",
+}
+
+const walkingZones = {
+    Z1: "Z1",
+    Z2: "Z2",
+    ZO: "Other residential area"
+}
+
+const walkingZoneColors = {
+    Z1: "#fdf108",
+    Z2: "#f37734",
+    ZO: "#9d9d9d"
+}
+
 var map = L.map('map', {
     crs: L.CRS.EPSG3857,
 }).setView([50.85406, -0.55345], 13);
 
 var defaultBase = L.tileLayer.provider('CyclOSM');
 defaultBase.addTo(map);
-
 
 //var defaultBase = L.tileLayer.provider('Stamen.TonerLite').addTo(map);
 
@@ -38,7 +63,7 @@ var baseLayers = {
 };
 
 var cyclingLayers = {};
-
+// add cycling routes
 for (const cyclingRoute in cyclingRoutes) {
     try {
         cyclingLayers[cyclingRoute] = L.geoPackageFeatureLayer([], {
@@ -71,9 +96,85 @@ for (const cyclingRoute in cyclingRoutes) {
     }
 }
 
+var walkingLayers = {};
+// add walking routes
+for (const walkingRoute in walkingRoutes) {
+    try {
+        walkingLayers[walkingRoute] = L.geoPackageFeatureLayer([], {
+            geoPackageUrl: './assets/ACWF_LCWIP_walking_routes.gpkg',
+            noCache: true,
+            layerName: walkingRoutes[walkingRoute],
+            style: function (feature) {
+                return {
+                    color: walkingRouteColors[walkingRoute],
+                    weight: 3,
+                    opacity: 0.6,
+                };
+            },
+            onEachFeature: function (feature, layer) {
+                let string = '';
+                for (const key in feature.properties) {
+                    string +=
+                        '<div class="item"><span class="label">' +
+                        key +
+                        ': </span><span class="value">' +
+                        feature.properties[key] +
+                        '</span></div>';
+                }
+                layer.bindPopup(string);
+            }
+        });
+        walkingLayers[walkingRoute].addTo(map);
+    } catch (e) {
+        console.error(e);
+    }
+}
+// add walking zones
+try {
+    walkingLayers["Walking Zones"] = L.geoPackageFeatureLayer([], {
+        geoPackageUrl: './assets/ACWF_LCWIP_walking_routes.gpkg',
+        noCache: true,
+        layerName: "Walking Zones",
+        style: function (feature) {
+            switch (feature.properties.zone_id) {
+                case "Z1": return {
+                    color: walkingZoneColors["Z1"],
+                    weight: 1,
+                    opacity: 0.8,
+                }; break;
+                case "Z2": return {
+                    color: walkingZoneColors["Z2"],
+                    weight: 1,
+                    opacity: 0.8,
+                }; break;
+                case "Other residential area": return {
+                    color: walkingZoneColors["ZO"],
+                    weight: 1,
+                    opacity: 0.8,
+                }; break;
+            }
+        },
+        onEachFeature: function (feature, layer) {
+            let string = '';
+            for (const key in feature.properties) {
+                string +=
+                    '<div class="item"><span class="label">' +
+                    key +
+                    ': </span><span class="value">' +
+                    feature.properties[key] +
+                    '</span></div>';
+            }
+            layer.bindPopup(string);
+        }
+    });
+    walkingLayers["Walking Zones"].addTo(map);
+} catch (e) {
+    console.error(e);
+}
 
 var groupedOverlays = {
     "Cycling Routes": cyclingLayers,
+    "Walking Routes & Zones": walkingLayers,
 };
 
 //add layer switch control
